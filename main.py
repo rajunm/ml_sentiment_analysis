@@ -6,7 +6,7 @@ app = Flask(__name__)
 
 
 # 1. Load the pretrained model
-sentiment_pipeline = pipeline("sentiment-analysis", model="huawei-noah/TinyBERT_General_4L_312D")  # Uses the default model from the hub for sentiment analysis
+sentiment_pipeline = pipeline("sentiment-analysis", model="huawei-noah/TinyBERT_General_4L_312D", low_cpu_mem_usage=True)  # Uses the default model from the hub for sentiment analysis
 # sentiment_pipeline = pipeline(model="finiteautomata/bertweet-base-sentiment-analysis")
 
 @app.route('/')
