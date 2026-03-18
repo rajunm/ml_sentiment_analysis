@@ -1,0 +1,11 @@
+__pycache__/
+*/__pycache__/
+data/
+model_weights/
+.env
+.ipynb_checkpoints/
+
+*.h5
+*.pt
+*.ckpt
+*.keras
