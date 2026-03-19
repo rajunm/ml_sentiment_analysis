@@ -6,8 +6,8 @@ app = Flask(__name__)
 
 
 # 1. Load the pretrained model
-sentiment_pipeline = pipeline("sentiment-analysis", low_cpu_mem_usage=True)  # Uses the default model from the hub for sentiment analysis
-# sentiment_pipeline = pipeline(model="finiteautomata/bertweet-base-sentiment-analysis")
+# sentiment_pipeline = pipeline("sentiment-analysis")  # Uses the default 
+sentiment_pipeline = pipeline("sentiment-analysis", model="elo4/TinyBERT-sentiment-model") 
 
 @app.route('/')
 def home():
@@ -16,21 +16,33 @@ def home():
 @app.route('/predict', methods=['POST'])
 def predict():
     try:
-        # 2. Extract JSON data from the request
-        data = request.get_json()
-        print(data, type(data))
-        input_text = [data['input_text']]     #["I love you", "I hate you"]
+        data = request.json['text']
+        if not data:
+            return jsonify({"error": "No text provided"}), 400
 
-        # 3. Use the model to predict the sentiment of the input text
-        output_txt = sentiment_pipeline(input_text)
-            
-        # 4. Return the result as JSON
+        # 2. Get prediction from model
+        #print(data)
+        result = sentiment_pipeline(data)[0]
+        
+        # 3. Map internal labels to the strings expected by your HTML/JS
+        # LABEL_0 = 1 star (Very Neg), LABEL_4 = 5 stars (Very Pos)
+        label_map = {
+            "LABEL_0": "Very Negative",
+            "LABEL_1": "Negative",
+            "LABEL_2": "Neutral",
+            "LABEL_3": "Positive",
+            "LABEL_4": "Very Positive"
+        }
+        
+        friendly_label = label_map.get(result['label'], "Unknown")
+        
         return jsonify({
-            'output text': output_txt                        # text_from_ids(input_ids, vocab).numpy().decode('utf-8')
+            "label": friendly_label,
+            "score": float(result['score'])
         })
 
     except Exception as e:
-        return jsonify({'error': str(e)}), 400
+        return jsonify({"error": str(e)}), 500
 
 if __name__ == "__main__":
     # Use the port assigned by the cloud provider, or 5000 for local testing

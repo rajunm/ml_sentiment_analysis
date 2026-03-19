@@ -2,57 +2,84 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Sentiment Analysis AI</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>5-Star Sentiment Analysis</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
 
-    <div class="card">
-        <h1>Sentiment AI</h1>
-        <p>Powered by Hugging Face Transformers</p>
+<div class="container">
+    <h1>Review AI Analyzer</h1>
+    <p class="subtitle">Enter text below to detect 5-level sentiment</p>
+    
+    <textarea id="userInput" placeholder="Write your review or comment here..."></textarea>
+    <br>
+    <button id="analyzeBtn" onclick="analyzeSentiment()">Analyze Sentiment</button>
 
-        <textarea id="textInput" placeholder="Type a sentence here..."></textarea>
-        
-        <button id="analyzeBtn" onclick="sendToModel()">
-            Analyze Sentiment
-        </button>
-
-        <div id="resultArea" class="hidden">
-            <hr>
-            <h2 id="labelDisplay"></h2>
-            <p id="scoreDisplay"></p>
-        </div>
+    <div id="result-container">
+        <div id="emoji-display"></div>
+        <p id="label">Result will appear here</p>
+        <p id="score"></p>
     </div>
+</div>
 
-    <script>
-        async function sendToModel() {
-            // 1. Grab the text from the box
-            const userInput = document.getElementById('textInput').value;
-            if (!userInput) return alert("Please type something first!");
+<script>
+    async function analyzeSentiment() {
+        const text = document.getElementById('userInput').value;
+        const resultContainer = document.getElementById('result-container');
+        const labelElement = document.getElementById('label');
+        const scoreElement = document.getElementById('score');
+        const emojiElement = document.getElementById('emoji-display');
+        const btn = document.getElementById('analyzeBtn');
 
-            // 2. Prepare the data to send (Matches your Flask/Postman format)
-            const payload = { "input_text": userInput };
+        if (!text.trim()) {
+            alert("Please enter some text!");
+            return;
+        }
 
-            // 3. Send it to your Flask /predict route
+        // UI Loading State
+        labelElement.innerText = "Analyzing...";
+        scoreElement.innerText = "";
+        emojiElement.innerText = "⏳";
+        resultContainer.style.display = "block";
+        resultContainer.className = "loading"; 
+        btn.disabled = true;
+
+        try {
             const response = await fetch('/predict', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(payload)
+                body: JSON.stringify({ text: text })
             });
-
-            // 4. Get the answer back
-            const data = await response.json();
-            const prediction = data['output text'][0];
-
-            // 5. Show the result on the screen
-            document.getElementById('resultArea').classList.remove('hidden');
-            document.getElementById('labelDisplay').innerText = prediction.label;
-            document.getElementById('scoreDisplay').innerText = "Confidence: " + (prediction.score * 100).toFixed(2) + "%";
             
-            // 6. Change color based on result
-            const card = document.querySelector('.card');
-            card.style.borderTop = prediction.label === "POSITIVE" ? "8px solid #10b981" : "8px solid #f43f5e";
+            const data = await response.json();
+
+            // UI Mapping based on your Python Label Map
+            const uiMap = {
+                "Very Negative": { class: "v-neg", emoji: "😠" },
+                "Negative": { class: "neg", emoji: "🙁" },
+                "Neutral": { class: "neu", emoji: "😐" },
+                "Positive": { class: "pos", emoji: "🙂" },
+                "Very Positive": { class: "v-pos", emoji: "🤩" }
+            };
+
+            const config = uiMap[data.label] || { class: "neu", emoji: "❓" };
+            
+            // Update UI
+            emojiElement.innerText = config.emoji;
+            labelElement.innerText = data.label;
+            scoreElement.innerText = `Confidence: ${(data.score * 100).toFixed(1)}%`;
+            resultContainer.className = config.class;
+
+        } catch (error) {
+            labelElement.innerText = "Connection Error";
+            emojiElement.innerText = "❌";
+            console.error(error);
+        } finally {
+            btn.disabled = false;
         }
-    </script>
+    }
+</script>
+
 </body>
 </html>
