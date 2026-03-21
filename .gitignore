@@ -4,8 +4,10 @@ data/
 model_weights/
 .env
 .ipynb_checkpoints/
+.pytest_cache/
 
 *.h5
+*.ipynb
 *.pt
 *.ckpt
 *.keras
