@@ -1,6 +1,7 @@
 __pycache__/
 */__pycache__/
 data/
+hf_cache/
 model_weights/
 .env
 .ipynb_checkpoints/
