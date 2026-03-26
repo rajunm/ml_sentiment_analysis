@@ -2,7 +2,7 @@ from dotenv import load_dotenv
 import os
 
 # This looks for the .env file and sets the variables
-load_dotenv()
+# load_dotenv()
 
 from flask import Flask, request, jsonify, render_template
 from transformers import pipeline
