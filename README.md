@@ -45,6 +45,10 @@ Unlike standard binary (Positive/Negative) classifiers, this app uses the **`elo
    #### Install packages
    pip install -r requirements.txt
 
+   #### Set environment variables for Hugging Face in your .env file
+   HF_HOME = '[project_root_dir]/hf_cache/'  # project_root_dir such as D:/my_projects/ml_sentiment_analysis
+   TRANSFORMERS_CACHE = '[project_root_dir]/hf_cache/' # Backup for older versions
+
 3. **Run the Application:**
    ```bash
    python main.py
